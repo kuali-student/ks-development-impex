@@ -31,6 +31,24 @@
         <mysql.version>5.1.22</mysql.version>
         <oracle.version>11.2.0.2</oracle.version>
         <oracle.artifactId>ojdbc6_g</oracle.artifactId>
+        <plugin.fusion.version>0.0.4</plugin.fusion.version>
+        
+        <!-- fusion-maven-plugin settings -->
+        
+        <fusion-maven-plugin.tag.phase>none</fusion-maven-plugin.tag.phase>
+        
+		<!--
+		 
+		   Set this to be the name of the variable containing the pull request number.
+		   
+		   Inside of the tag mojo the environment variable is retrieved using this key.
+		   
+		 -->
+		<fusion-maven-plugin.tag.pull-request-number-property/>
+		
+		<!-- this is the actual pull request number.  Its needed when creating the database qualifier for the pull request. -->
+		
+		<fusion-maven-plugin.tag.pull-request-number/>
     </properties>
     <profiles>
         <profile>
@@ -212,6 +230,7 @@
                 <db.branch.qualifier>_SONAR</db.branch.qualifier>
             </properties>
         </profile>
+        
     </profiles>
     
     <build>
@@ -316,5 +335,55 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
+ 	<plugins>
+		<plugin>
+                    <groupId>org.kuali.maven.plugins</groupId>
+                    <artifactId>fusion-maven-plugin</artifactId>
+                    <version>${plugin.fusion.version}</version>
+
+		    <configuration>
+		    	<!-- impex doesn't have mappings so let the plugin work without them -->
+		    	<ignoreUndefinedMappings>true</ignoreUndefinedMappings>
+			<linkedVersionPropertyNames>
+				<versionPropertyName>ks.core.version</versionPropertyName>
+				<versionPropertyName>ks.lum.version</versionPropertyName>
+				<versionPropertyName>ks.enroll.version</versionPropertyName>
+				<versionPropertyName>ks.ap.version</versionPropertyName>
+				<versionPropertyName>ks.deployments.version</versionPropertyName>
+				<versionPropertyName>ks.fa.version</versionPropertyName>
+			</linkedVersionPropertyNames>
+
+		    </configuration>
+
+                    <executions>
+		    
+		    	<execution>
+				<id>tag-build</id>
+				<phase>${fusion-maven-plugin.tag-build.phase}</phase>
+				<goals>
+					<goal>tag</goal>
+				</goals>
+				<configuration>
+					<tagStyle>BUILD_NUMBER</tagStyle>
+					<buildNumberProperty>BUILD_NUMBER</buildNumberProperty>
+				</configuration>
+			</execution>
+
+			<execution>
+				<id>tag-pull-request</id>
+				<phase>${fusion-maven-plugin.tag-pull-request.phase}</phase>
+				<goals>
+					<goal>tag</goal>
+				</goals>
+				<configuration>
+					<tagStyle>BUILD_NUMBER</tagStyle>
+					<buildNumberProperty>${fusion-maven-plugin.tag.pull-request-number-property}</buildNumberProperty>
+					<buildText>pull-request</buildText>
+				</configuration>
+			</execution>
+                    </executions>
+                </plugin>
+	</plugins>
     </build>
 </project>
